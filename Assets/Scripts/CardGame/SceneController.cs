@@ -1,5 +1,4 @@
 ﻿using System.Collections;
-using System.Collections.Generic;
 using UnityEngine;
 using UnityEngine.SceneManagement;
 
@@ -15,17 +14,42 @@ public class SceneController : MonoBehaviour
 
     private MemoryCard _firstRevealed, _secondRevealed;
 
-    public bool CanReveal => _secondRevealed == null;
+    public bool CanReveal => _secondRevealed == null && !paused;
 
-    private int _score = 0;
+    private int _score = 0, _pairsFound = 0;
 
-    [SerializeField] private TextMesh scoreLabel;
+    public float timeOutSeconds = 3.0f;
+    float currentTime;
 
-    private int _numberOfCards;
+    private bool _paused;
+    public bool paused
+    {
+        get => _paused;
+        set
+        {
+            _paused = value;
+            Time.timeScale = value ? 0.0f : 1.0f;
+            ui.ShowPauseMenu(value);
+        }
+    }
+
+    public int numberOfCards => gridCols * gridRows;
+
+    public bool gameover => _pairsFound == numberOfCards / 2;
+
+    private UIController ui;
+
+    private void Awake()
+    {
+        ui = GetComponent<UIController>();
+    }
 
     // Start is called before the first frame update
     void Start()
     {
+        // The pause menu starts not visible
+        ui.ShowPauseMenu(false);
+
         // Place the cards in the board
 
         float totalHeight = Camera.main.orthographicSize * 2;
@@ -34,8 +58,7 @@ public class SceneController : MonoBehaviour
         float cardHeight = (totalHeight - header - margin) / gridRows;
 
         // Ensure that there are only pairs in the board
-        _numberOfCards = gridRows * gridCols;
-        int[] ids = new int[_numberOfCards];
+        int[] ids = new int[numberOfCards];
         for (int i = 0; i < ids.Length; i++)
         {
             ids[i] = i / 2;
@@ -60,8 +83,35 @@ public class SceneController : MonoBehaviour
         }
     }
 
+    void Update()
+    {
+        if (Input.GetKeyDown(KeyCode.Escape))
+        {
+            paused = !paused;
+        }
+
+        if (paused) return;
+
+        currentTime -= Time.deltaTime;
+        if (currentTime < 0)
+        {
+            if (_score > 0)
+            {
+                _score--; ui.SetScore(_score);
+            }
+            ResetTimeOut();
+        }
+        ui.SetTimeOutValue(currentTime / timeOutSeconds);
+    }
+
+    void ResetTimeOut()
+    {
+        currentTime = timeOutSeconds;
+    }
+
     public void CardRevealed(MemoryCard card)
     {
+        ResetTimeOut();
         if (_firstRevealed == null)
         {
             _firstRevealed = card;
@@ -78,15 +128,27 @@ public class SceneController : MonoBehaviour
         SceneManager.LoadScene("CardGame");
     }
 
+    public void Quit()
+    {
+#if UNITY_EDITOR
+        UnityEditor.EditorApplication.ExitPlaymode();
+#else
+        Application.Quit();
+#endif
+    }
+
     private IEnumerator CheckMatch()
     {
         if (_firstRevealed.Id == _secondRevealed.Id)
         {
             _score++;
-            scoreLabel.text = "Score: " + _score;
+            ui.SetScore(_score);
+            _pairsFound++;
 
-            if (_score == _numberOfCards / 2)
+            if (gameover)
             {
+                ui.EnableTimeOutBar(false);
+                paused = true;
                 Debug.Log("CONGRATULATIONS! YOU WON");
             }
         }
