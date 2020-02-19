@@ -8,6 +8,12 @@ public class UIController : MonoBehaviour
     [SerializeField] private RawImage barImg;
     [SerializeField] private GameObject pauseMenu;
     [SerializeField] private SceneController sceneController;
+    [SerializeField] private SettingsPopup settingsPopup;
+
+    void Start()
+    {
+        settingsPopup.Close();
+    }
 
     public void SetScore(int score)
     {
@@ -17,6 +23,7 @@ public class UIController : MonoBehaviour
     public void OnOpenSettings()
     {
         sceneController.paused = true;
+        settingsPopup.Open();
     }
 
     public void ShowPauseMenu(bool isPaused)
