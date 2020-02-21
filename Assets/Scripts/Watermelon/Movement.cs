@@ -2,70 +2,73 @@
 using System.Collections.Generic;
 using UnityEngine;
 
-public class Movement : MonoBehaviour
+namespace Watermelon
 {
-    public float speed = 10f;
-    public float jumpForce = 30f;
-
-    public bool freezeJump = false;
-
-    private float RelativeSpeed => speed * Time.fixedDeltaTime;
-    private float RelativeJumpForce => jumpForce * Time.fixedDeltaTime;
-
-    private Rigidbody2D rb;
-
-    // Start is called before the first frame update
-    void Start()
+    public class Movement : MonoBehaviour
     {
-        rb = GetComponent<Rigidbody2D>();
-    }
+        public float speed = 10f;
+        public float jumpForce = 30f;
 
-    // Update is called once per frame
-    void Update()
-    {
-        
-    }
+        public bool freezeJump = false;
 
-    void FixedUpdate()
-    {
-        if (isActiveAndEnabled)
+        private float RelativeSpeed => speed * Time.fixedDeltaTime;
+        private float RelativeJumpForce => jumpForce * Time.fixedDeltaTime;
+
+        private Rigidbody2D rb;
+
+        // Start is called before the first frame update
+        void Start()
         {
-            ApplyMovement();
-            if (!freezeJump) ApplyJump();
-        }
-    }
-
-    private void ApplyMovement()
-    {
-        Vector2 move = Vector2.zero;
-
-        if (Input.GetKey(KeyCode.A))
-        {
-            move.x -= RelativeSpeed;
+            rb = GetComponent<Rigidbody2D>();
         }
 
-        if (Input.GetKey(KeyCode.D))
+        // Update is called once per frame
+        void Update()
         {
-            move.x += RelativeSpeed;
+
         }
 
-        rb.AddForce(move, ForceMode2D.Impulse);
-    }
-
-    private void ApplyJump()
-    {
-        Vector2 jump = Vector2.zero;
-
-        if (Input.GetKey(KeyCode.W))
+        void FixedUpdate()
         {
-            jump.y += RelativeJumpForce;
+            if (isActiveAndEnabled)
+            {
+                ApplyMovement();
+                if (!freezeJump) ApplyJump();
+            }
         }
 
-        if (Input.GetKey(KeyCode.S))
+        private void ApplyMovement()
         {
-            jump.y -= RelativeJumpForce;
+            Vector2 move = Vector2.zero;
+
+            if (Input.GetKey(KeyCode.A))
+            {
+                move.x -= RelativeSpeed;
+            }
+
+            if (Input.GetKey(KeyCode.D))
+            {
+                move.x += RelativeSpeed;
+            }
+
+            rb.AddForce(move, ForceMode2D.Impulse);
         }
 
-        rb.AddForce(jump, ForceMode2D.Impulse);
+        private void ApplyJump()
+        {
+            Vector2 jump = Vector2.zero;
+
+            if (Input.GetKey(KeyCode.W))
+            {
+                jump.y += RelativeJumpForce;
+            }
+
+            if (Input.GetKey(KeyCode.S))
+            {
+                jump.y -= RelativeJumpForce;
+            }
+
+            rb.AddForce(jump, ForceMode2D.Impulse);
+        }
     }
 }
