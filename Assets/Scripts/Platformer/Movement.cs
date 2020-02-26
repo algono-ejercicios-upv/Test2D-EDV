@@ -9,7 +9,7 @@ namespace Platformer
 
         public bool multiJump = false;
 
-        public bool freezeJump = false, turnAround = true, stickToGround = true;
+        public bool freezeJump = false, turnAround = true;
 
         private float RelativeSpeed => speed * Time.fixedDeltaTime;
         private float RelativeJumpForce => jumpForce * Time.fixedDeltaTime;
@@ -21,7 +21,7 @@ namespace Platformer
 
         private JumpState jumpState = JumpState.grounded;
 
-        private bool lookInverted = false;
+        public bool lookInverted { get; private set; } = false;
 
         // Start is called before the first frame update
         void Start()
@@ -42,16 +42,23 @@ namespace Platformer
 
         private void OnCollisionEnter2D(Collision2D collision)
         {
-            if ((collision.transform.position - this.transform.position).y < 0)
+            if (transform.InverseTransformPoint(collision.transform.position).y < 0)
             {
                 SetJumpState(JumpState.grounded);
-                
-                if (stickToGround && collision.collider.CompareTag("Ground"))
+
+                MovingPlatform movingPlatform = collision.gameObject.GetComponent<MovingPlatform>();
+                if (movingPlatform != null)
                 {
-                    var newUp = collision.collider.transform.up;
-                    transform.rotation = Quaternion.LookRotation(Vector3.forward, newUp);
-                    if (lookInverted) TurnAround(false);
+                    transform.parent = collision.transform;
                 }
+            }
+        }
+
+        private void OnCollisionExit2D(Collision2D collision)
+        {
+            if (transform.parent != null && collision.gameObject == transform.parent.gameObject)
+            {
+                transform.parent = null;
             }
         }
 
@@ -72,7 +79,7 @@ namespace Platformer
             Physics2D.gravity = transform.up * -(Physics2D.gravity.magnitude);
         }
 
-        private void ResetRotation()
+        public void ResetRotation()
         {
             transform.rotation = Quaternion.identity;
             if (lookInverted) TurnAround(false);
@@ -116,7 +123,7 @@ namespace Platformer
             } 
         }
 
-        private void TurnAround(bool updateLook = true)
+        public void TurnAround(bool updateLook = true)
         {
             transform.Rotate(Vector2.up, 180f);
             if (updateLook) lookInverted = !lookInverted;
@@ -124,8 +131,6 @@ namespace Platformer
 
         private void ApplyJump()
         {
-            Vector2 jump = Vector2.zero;
-
             if (jumpState == JumpState.jumping)
             {
                 if (rb.velocity.y == 0)
@@ -136,12 +141,16 @@ namespace Platformer
 
             if (Input.GetKey(KeyCode.Space) && (multiJump || jumpState == JumpState.grounded))
             {
-                jump.y += RelativeJumpForce;
                 SetJumpState(JumpState.jumping);
                 anim.SetBool("jumping", true);
-            }
 
-            rb.AddForce(transform.TransformVector(jump), ForceMode2D.Impulse);
+                Jump(RelativeJumpForce);
+            }
+        }
+
+        public void Jump(float force)
+        {
+            rb.AddForce(transform.TransformVector(Vector2.up * force), ForceMode2D.Impulse);
         }
     }
 }
