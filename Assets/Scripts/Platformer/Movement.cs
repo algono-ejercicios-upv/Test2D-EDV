@@ -21,6 +21,8 @@ namespace Platformer
 
         private JumpState jumpState = JumpState.grounded;
 
+        private Vector3 pScale = Vector3.one;
+
         // Start is called before the first frame update
         void Start()
         {
@@ -48,6 +50,7 @@ namespace Platformer
                 if (movingPlatform != null)
                 {
                     transform.parent = collision.transform;
+                    pScale = collision.transform.localScale;
                 }
             }
         }
@@ -57,6 +60,7 @@ namespace Platformer
             if (transform.parent != null && collision.gameObject == transform.parent.gameObject)
             {
                 transform.parent = null;
+                pScale = Vector3.one;
             }
         }
 
@@ -99,7 +103,7 @@ namespace Platformer
                 rb.AddForce(actualMove, ForceMode2D.Impulse);
                 anim.SetFloat("speed", RelativeSpeed);
 
-                transform.localScale = new Vector3(lookDirection, 1, 1);
+                transform.localScale = new Vector3(lookDirection / pScale.x, 1 / pScale.y, 1 / pScale.z);
             }
             else
             {
