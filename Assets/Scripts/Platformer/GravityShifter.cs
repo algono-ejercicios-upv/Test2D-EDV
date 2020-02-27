@@ -1,18 +1,18 @@
-﻿using UnityEngine;
+﻿using System.Collections;
+using UnityEngine;
 
 namespace Platformer
 {
     public class GravityShifter : MonoBehaviour
     {
+        public float rotationSpeed = 100f;
+
         private void OnTriggerEnter2D(Collider2D collision)
         {
             if (collision.CompareTag("Player"))
             {
-                Physics2D.gravity = transform.up * -(Physics2D.gravity.magnitude);
-                collision.transform.rotation = Quaternion.LookRotation(Vector3.forward, transform.up);
-
-                Movement playerMovement = collision.GetComponent<Movement>();
-                if (playerMovement.lookInverted) playerMovement.TurnAround(false);
+                StopAllCoroutines();
+                StartCoroutine(ApplyGravity(collision.transform));
             }
         }
 
@@ -20,12 +20,36 @@ namespace Platformer
         {
             if (collision.CompareTag("Player"))
             {
-                Physics2D.gravity = Vector2.up * -(Physics2D.gravity.magnitude);
-                
-                Movement playerMovement = collision.GetComponent<Movement>();
-                playerMovement.ResetRotation();
-
+                StopAllCoroutines();
+                StartCoroutine(ResetGravity(collision.transform));
             }
+        }
+
+        private IEnumerator ApplyGravity(Transform other)
+        {
+            yield return ApplyGravity(other, transform.up, Quaternion.LookRotation(Vector3.forward, transform.up));
+        }
+
+        private IEnumerator ResetGravity(Transform other)
+        {
+            yield return ApplyGravity(other, Vector2.up, Quaternion.identity);
+        }
+
+        private IEnumerator ApplyGravity(Transform other, Vector3 gravityDirection, Quaternion targetRotation)
+        {
+            Physics2D.gravity = gravityDirection * -(Physics2D.gravity.magnitude);
+
+            other.transform.eulerAngles = new Vector3(0, 0, other.transform.eulerAngles.z); // Rotate only around z
+
+            while (other.transform.rotation != targetRotation)
+            {
+                var step = rotationSpeed * Time.deltaTime;
+                other.transform.rotation = Quaternion.RotateTowards(other.transform.rotation, targetRotation, step);
+
+                yield return new WaitForEndOfFrame();
+            }
+
+            yield return null;
         }
     }
 }

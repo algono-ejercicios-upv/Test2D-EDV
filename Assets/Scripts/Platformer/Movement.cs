@@ -124,9 +124,9 @@ namespace Platformer
         }
 
         public void TurnAround(bool updateLook = true)
-        {
-            transform.Rotate(Vector2.up, 180f);
+        {         
             if (updateLook) lookInverted = !lookInverted;
+            transform.localScale = new Vector3((lookInverted ? -1 : 1), 1, 1);
         }
 
         private void ApplyJump()
