@@ -1355,6 +1355,7 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   speed: 10
+  maxSpeed: 10
   jumpForce: 300
   multiJump: 0
   freezeJump: 0

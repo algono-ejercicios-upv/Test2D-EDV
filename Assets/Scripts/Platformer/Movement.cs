@@ -4,7 +4,7 @@ namespace Platformer
 {
     public class Movement : MonoBehaviour
     {
-        public float speed = 10f;
+        public float speed = 10f, maxSpeed = 10f;
         public float jumpForce = 30f;
 
         public bool multiJump = false;
@@ -20,8 +20,6 @@ namespace Platformer
         enum JumpState { grounded, jumping, floating, falling }
 
         private JumpState jumpState = JumpState.grounded;
-
-        public bool lookInverted { get; private set; } = false;
 
         // Start is called before the first frame update
         void Start()
@@ -74,15 +72,9 @@ namespace Platformer
         {
             transform.position = new Vector3(0f, 0f, transform.position.z);
             rb.velocity = Vector2.zero;
-            lookInverted = false;
-            ResetRotation();
-            Physics2D.gravity = transform.up * -(Physics2D.gravity.magnitude);
-        }
-
-        public void ResetRotation()
-        {
             transform.rotation = Quaternion.identity;
-            if (lookInverted) TurnAround(false);
+            transform.localScale = Vector3.one;
+            Physics2D.gravity = transform.up * -(Physics2D.gravity.magnitude);
         }
 
         private void SetJumpState(JumpState value)
@@ -97,36 +89,22 @@ namespace Platformer
 
         private void ApplyMovement()
         {
-            bool move = false;
+            float axis = Input.GetAxis("Horizontal");
+            float lookDirection = Mathf.Sign(axis), initSpeed = Mathf.Abs(axis);
 
-            if (Input.GetKey(KeyCode.A))
+            if (initSpeed > 0)
             {
-                move = true;
-                if (!lookInverted) TurnAround();
-            }
+                Vector2 actualMove = transform.TransformVector(new Vector2(Mathf.Min(RelativeSpeed, maxSpeed), 0f));
 
-            if (Input.GetKey(KeyCode.D))
-            {
-                move = true;
-                if (lookInverted) TurnAround();
-            }
-
-            if (move)
-            {
-                Vector2 actualMove = transform.TransformVector(new Vector2(RelativeSpeed, 0f));
                 rb.AddForce(actualMove, ForceMode2D.Impulse);
                 anim.SetFloat("speed", RelativeSpeed);
+
+                transform.localScale = new Vector3(lookDirection, 1, 1);
             }
             else
             {
                 anim.SetFloat("speed", 0f);
             } 
-        }
-
-        public void TurnAround(bool updateLook = true)
-        {         
-            if (updateLook) lookInverted = !lookInverted;
-            transform.localScale = new Vector3((lookInverted ? -1 : 1), 1, 1);
         }
 
         private void ApplyJump()
