@@ -5,7 +5,9 @@ namespace Platformer
 {
     public class GravityShifter : MonoBehaviour
     {
-        public float rotationSpeed = 100f;
+        public float rotationSpeed = 100f, gravityStrength = 9.8f;
+
+        private float? _originalGravityStrength;
 
         private void OnTriggerEnter2D(Collider2D collision)
         {
@@ -27,17 +29,19 @@ namespace Platformer
 
         private IEnumerator ApplyGravity(Transform other)
         {
-            yield return ApplyGravity(other, transform.up, Quaternion.LookRotation(Vector3.forward, transform.up));
+            _originalGravityStrength = Physics2D.gravity.magnitude;
+            yield return ApplyGravity(other, transform.up, gravityStrength, Quaternion.LookRotation(Vector3.forward, transform.up));
         }
 
         private IEnumerator ResetGravity(Transform other)
         {
-            yield return ApplyGravity(other, Vector2.up, Quaternion.identity);
+            yield return ApplyGravity(other, Vector2.up, _originalGravityStrength ?? gravityStrength, Quaternion.identity);
+            _originalGravityStrength = null;
         }
 
-        private IEnumerator ApplyGravity(Transform other, Vector3 gravityDirection, Quaternion targetRotation)
+        private IEnumerator ApplyGravity(Transform other, Vector3 gravityDirection, float gravityStrength, Quaternion targetRotation)
         {
-            Physics2D.gravity = gravityDirection * -(Physics2D.gravity.magnitude);
+            Physics2D.gravity = gravityDirection * -(gravityStrength);
 
             other.transform.eulerAngles = new Vector3(0, 0, other.transform.eulerAngles.z); // Rotate only around z
 

@@ -93,22 +93,26 @@ namespace Platformer
 
         private void ApplyMovement()
         {
-            float axis = Input.GetAxis("Horizontal");
-            float lookDirection = Mathf.Sign(axis), initSpeed = Mathf.Abs(axis);
+            float deltaX = Input.GetAxis("Horizontal");
+            float direction = Mathf.Sign(deltaX);
 
-            if (initSpeed > 0)
+            if (!Mathf.Approximately(deltaX, 0))
             {
-                Vector2 actualMove = transform.TransformVector(new Vector2(Mathf.Min(RelativeSpeed, maxSpeed), 0f));
+                Vector2 actualMove = transform.TransformVector(new Vector2(Mathf.Min(Mathf.Abs(deltaX) * RelativeSpeed, maxSpeed), 0f));
 
                 rb.AddForce(actualMove, ForceMode2D.Impulse);
                 anim.SetFloat("speed", RelativeSpeed);
+
+
+                // If the player is upside down, look direction is inverted
+                float lookDirection = Quaternion.Angle(transform.rotation, Quaternion.Euler(0, 0, 180)) < 80f ? direction * -1 : direction;
 
                 transform.localScale = new Vector3(lookDirection / pScale.x, 1 / pScale.y, 1 / pScale.z);
             }
             else
             {
                 anim.SetFloat("speed", 0f);
-            } 
+            }
         }
 
         private void ApplyJump()
