@@ -18,7 +18,7 @@ namespace Platformer
         {
             if (collision.CompareTag("Player"))
             {
-                Movement playerMovement = collision.GetComponent<Movement>();
+                PlayerMovement playerMovement = collision.GetComponent<PlayerMovement>();
                 playerMovement.Jump(springForce);
                 _anim.SetTrigger("extend");
             }

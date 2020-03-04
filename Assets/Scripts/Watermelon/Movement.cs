@@ -1,10 +1,8 @@
-﻿using System.Collections;
-using System.Collections.Generic;
-using UnityEngine;
+﻿using UnityEngine;
 
 namespace Watermelon
 {
-    public class Movement : MonoBehaviour
+    public class Movement : SimpleMovement
     {
         public float speed = 10f;
         public float jumpForce = 30f;
@@ -14,30 +12,7 @@ namespace Watermelon
         private float RelativeSpeed => speed * Time.fixedDeltaTime;
         private float RelativeJumpForce => jumpForce * Time.fixedDeltaTime;
 
-        private Rigidbody2D rb;
-
-        // Start is called before the first frame update
-        void Start()
-        {
-            rb = GetComponent<Rigidbody2D>();
-        }
-
-        // Update is called once per frame
-        void Update()
-        {
-
-        }
-
-        void FixedUpdate()
-        {
-            if (isActiveAndEnabled)
-            {
-                ApplyMovement();
-                if (!freezeJump) ApplyJump();
-            }
-        }
-
-        private void ApplyMovement()
+        public override void ApplyMovement()
         {
             Vector2 move = Vector2.zero;
 
@@ -54,8 +29,10 @@ namespace Watermelon
             rb.AddForce(move, ForceMode2D.Impulse);
         }
 
-        private void ApplyJump()
+        public override void ApplyJump()
         {
+            if (freezeJump) return;
+
             Vector2 jump = Vector2.zero;
 
             if (Input.GetKey(KeyCode.W))

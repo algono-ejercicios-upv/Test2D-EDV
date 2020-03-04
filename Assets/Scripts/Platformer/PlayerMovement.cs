@@ -2,7 +2,7 @@
 
 namespace Platformer
 {
-    public class Movement : MonoBehaviour
+    public class PlayerMovement : SimpleMovement
     {
         public float speed = 10f, maxSpeed = 10f;
         public float jumpForce = 30f;
@@ -14,7 +14,6 @@ namespace Platformer
         private float RelativeSpeed => speed * Time.fixedDeltaTime;
         private float RelativeJumpForce => jumpForce * Time.fixedDeltaTime;
 
-        private Rigidbody2D rb;
         private Animator anim;
 
         enum JumpState { grounded, jumping, floating, falling }
@@ -24,20 +23,10 @@ namespace Platformer
         private Vector3 pScale = Vector3.one;
 
         // Start is called before the first frame update
-        void Start()
+        protected override void Start()
         {
-            rb = GetComponent<Rigidbody2D>();
+            base.Start();
             anim = GetComponent<Animator>();
-        }
-
-        void FixedUpdate()
-        {
-            if (isActiveAndEnabled)
-            {
-                ApplyMovement();
-
-                if (!freezeJump) ApplyJump();
-            }
         }
 
         private void OnCollisionEnter2D(Collision2D collision)
@@ -91,7 +80,7 @@ namespace Platformer
             }
         }
 
-        private void ApplyMovement()
+        public override void ApplyMovement()
         {
             float deltaX = Input.GetAxis("Horizontal");
             float direction = Mathf.Sign(deltaX);
@@ -115,8 +104,10 @@ namespace Platformer
             }
         }
 
-        private void ApplyJump()
+        public override void ApplyJump()
         {
+            if (freezeJump) return;
+
             if (jumpState == JumpState.jumping)
             {
                 if (rb.velocity.y == 0)
