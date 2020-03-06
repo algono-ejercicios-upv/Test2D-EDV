@@ -22,11 +22,14 @@ namespace Platformer
 
         private Vector3 pScale = Vector3.one;
 
+        private PlatformerManager gameManager;
+
         // Start is called before the first frame update
         protected override void Start()
         {
             base.Start();
             anim = GetComponent<Animator>();
+            gameManager = FindObjectOfType<PlatformerManager>();
         }
 
         private void OnCollisionEnter2D(Collision2D collision)
@@ -57,13 +60,13 @@ namespace Platformer
         {
             if (collision.CompareTag("Respawn"))
             {
-                Respawn();
+                Respawn(gameManager.Checkpoint.transform);
             }
         }
 
-        private void Respawn()
+        private void Respawn(Transform checkpoint)
         {
-            transform.position = new Vector3(0f, 0f, transform.position.z);
+            transform.position = new Vector3(checkpoint.position.x, checkpoint.position.y, transform.position.z);
             rb.velocity = Vector2.zero;
             transform.rotation = Quaternion.identity;
             transform.localScale = Vector3.one;
