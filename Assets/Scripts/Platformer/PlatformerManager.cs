@@ -9,6 +9,12 @@ public class PlatformerManager : MonoBehaviour
     // Start is called before the first frame update
     void Start()
     {
-        Checkpoint = startingCheckpoint;   
+        ResetCheckpoint();
+    }
+
+    public void ResetCheckpoint()
+    {
+        if (Checkpoint != null) Checkpoint.Uncheck();
+        Checkpoint = startingCheckpoint;
     }
 }
