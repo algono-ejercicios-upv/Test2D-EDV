@@ -15,7 +15,7 @@ TagManager:
   - UI
   - 
   - 
-  - 
+  - Blocking
   - 
   - 
   - 
@@ -49,7 +49,7 @@ TagManager:
   - name: Platforms
     uniqueID: 3957273269
     locked: 0
-  - name: Player
+  - name: Characters
     uniqueID: 1815720235
     locked: 0
   - name: Foreground
